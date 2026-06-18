@@ -12,7 +12,7 @@ public class TokenRingNode {
     private static double timeoutTokenSecs;
     private static double tempoMinimoTokensSecs;
     private static final int PORTA = 6000;
-    
+    private static String meuIp;
     // Topologia em Anel
     private static final TreeMap<String, InetAddress> rede = new TreeMap<>();
     private static String apelidoSucessor = null;
@@ -30,7 +30,7 @@ public class TokenRingNode {
     
     public static void main(String[] args) {
         try {
-            carregarConfiguracao();
+            carregarConfiguracao(); ///adicionar o ip como parametro
             socket = new DatagramSocket(PORTA);
             socket.setBroadcast(true);
 
@@ -38,8 +38,7 @@ public class TokenRingNode {
             new Thread(TokenRingNode::escutarRede).start();
 
             // Adiciona a si mesmo na rede
-            rede.put(meuApelido, InetAddress.getLocalHost());
-            
+            rede.put(meuApelido, InetAddress.getByName(meuIp));            
             System.out.println("Iniciando Nó " + meuApelido + " | Esperando formar anel...");
 
             // Envia DISCOVER em Broadcast
@@ -55,13 +54,13 @@ public class TokenRingNode {
         }
     }
 
-    private static void carregarConfiguracao() throws IOException {
+   private static void carregarConfiguracao() throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader("config.txt"));
         meuApelido = reader.readLine().trim();
+        meuIp = reader.readLine().trim(); // Lê o IP da segunda linha
         tempoDelaySeconds = Integer.parseInt(reader.readLine().trim());
         probabilidadeErro = Integer.parseInt(reader.readLine().trim());
         
-        // Lê os novos parâmetros substituindo vírgula por ponto para o parse do Double
         timeoutTokenSecs = Double.parseDouble(reader.readLine().trim().replace(",", "."));
         tempoMinimoTokensSecs = Double.parseDouble(reader.readLine().trim().replace(",", "."));
         
@@ -77,7 +76,9 @@ public class TokenRingNode {
         int nextIndex = (meuIndex + 1) % apelidos.size();
         apelidoSucessor = apelidos.get(nextIndex);
         ipSucessor = rede.get(apelidoSucessor);
+        System.out.println("sucessor: " + apelidoSucessor);
         
+
         // A primeira máquina gera o token e se torna a CONTROLADORA
         if (meuIndex == 0 && !possuiToken && rede.size() >= 3) {
             System.out.println("[SISTEMA] Sou a controladora. Gerando o Token inicial...");
@@ -139,6 +140,7 @@ public class TokenRingNode {
                         if (!origemHello.equals(meuApelido)) {
                             rede.put(origemHello, ipHello);
                             atualizarSucessor();
+                            System.out.println(apelidoSucessor);
                         }
                         break;
 
