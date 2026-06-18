@@ -43,8 +43,9 @@ public class TokenRingNode {
 
             // Envia DISCOVER em Broadcast
            // System.out.println("DISCOVER "+meuApelido+" " + meuApelido + " " + InetAddress.getLocalHost().getHostAddress()+ " ENVIADO");
-            enviarPacote("10:" + meuApelido + ":" + InetAddress.getLocalHost().getHostAddress(), 
-                         InetAddress.getByName("255.255.255.255"));
+            String discoverMsg = "10:" + meuApelido + ":" + meuIp;
+            //enviarPacote("10:" + meuApelido + ":" + InetAddress.getLocalHost().getHostAddress(),InetAddress.getByName("255.255.255.255"));
+            enviarPacote(discoverMsg, InetAddress.getByName("255.255.255.255"));
 
             // Inicia interface do usuário
             interfaceUsuario();
