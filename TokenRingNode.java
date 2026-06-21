@@ -39,7 +39,7 @@ public class TokenRingNode {
 
             // Adiciona a si mesmo na rede
             rede.put(meuApelido, InetAddress.getByName(meuIp));            
-            System.out.println("Iniciando Nó " + meuApelido + " | Esperando formar anel...");
+            System.out.println("[INICIO] Iniciando Nó " + meuApelido + " | Esperando formar anel...");
 
             // Envia DISCOVER em Broadcast
            // System.out.println("DISCOVER "+meuApelido+" " + meuApelido + " " + InetAddress.getLocalHost().getHostAddress()+ " ENVIADO");
@@ -77,11 +77,11 @@ public class TokenRingNode {
         int nextIndex = (meuIndex + 1) % apelidos.size();
         apelidoSucessor = apelidos.get(nextIndex);
         ipSucessor = rede.get(apelidoSucessor);
-        System.out.println("sucessor: " + apelidoSucessor);
+        System.out.println("[SUCESSOR]: " + apelidoSucessor);
         
 
         // A primeira máquina gera o token e se torna a CONTROLADORA
-        if (meuIndex == 0 && !possuiToken && rede.size() >= 3) {
+        if (meuIndex == 0 && !possuiToken && rede.size() >= 2) {
             System.out.println("[SISTEMA] Sou a controladora. Gerando o Token inicial...");
             possuiToken = true;
             souControladorToken = true;
@@ -122,7 +122,7 @@ public class TokenRingNode {
                 String dadosRecebidos = new String(pct.getData(), 0, pct.getLength());
                 String[] partes = dadosRecebidos.split(":");
                 String codigo = partes[0];
-                System.out.println(dadosRecebidos +  " RECEBIDO");
+                System.out.println("[RECEBIDO] " +dadosRecebidos);
                 switch (codigo) {
                     case "10": // DISCOVER
                         String origemDesc = partes[1];
@@ -130,8 +130,8 @@ public class TokenRingNode {
                         if (!origemDesc.equals(meuApelido)) {
                             rede.put(origemDesc, ipDesc);
                             atualizarSucessor();
-                            System.out.println("DISCOVER "+meuApelido+" " + meuApelido + " " + InetAddress.getLocalHost().getHostAddress()+ " ENVIADO");
-                            enviarPacote("20:" + meuApelido + ":" + InetAddress.getLocalHost().getHostAddress(), ipDesc);
+                            System.out.println("[DISCOVER] "+meuApelido+" " + meuApelido + " " + meuIp + " ENVIADO");
+                            enviarPacote("20:" + meuApelido + ":" + meuIp, ipDesc);
                         }
                         break;
                         
@@ -141,7 +141,7 @@ public class TokenRingNode {
                         if (!origemHello.equals(meuApelido)) {
                             rede.put(origemHello, ipHello);
                             atualizarSucessor();
-                            System.out.println(apelidoSucessor);
+                            System.out.println("[SUCESSOR pos update] "+ apelidoSucessor);
                         }
                         break;
 
@@ -309,7 +309,7 @@ public class TokenRingNode {
     }
 
     private static void enviarPacote(String dados, InetAddress ip) throws Exception {
-        System.out.println(dados + " " + ip + " ENVIADO");
+        System.out.println("[ENVIADO] "+ dados + " " + ip );
         if (ip != null) {
             byte[] buffer = dados.getBytes();
             DatagramPacket pct = new DatagramPacket(buffer, buffer.length, ip, PORTA);
